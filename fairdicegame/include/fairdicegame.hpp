@@ -2,6 +2,7 @@
 #include <eosiolib/transaction.hpp>
 #include "eosio.token.hpp"
 #include "types.hpp"
+#include <eosiolib/eosio.hpp>
 
 class fairdicegame : public contract {
    public:
@@ -12,6 +13,7 @@ class fairdicegame : public contract {
           _hash(_self, _self),
           _global(_self, _self){};
 
+    // @abi action
     void transfer(const account_name& from, const account_name& to, const asset& quantity, const string& memo);
 
     // @abi action
@@ -27,7 +29,7 @@ class fairdicegame : public contract {
     tb_global _global;
 
     void parse_memo(string memo,
-                    uint8_t* roll_under,
+                    /* uint8_t* roll_under, */
                     checksum256* seed_hash,
                     checksum160* user_seed_hash,
                     uint64_t* expiration,
@@ -40,14 +42,18 @@ class fairdicegame : public contract {
                    memo.end());
 
         size_t sep_count = std::count(memo.begin(), memo.end(), '-');
-        eosio_assert(sep_count == 5, "invalid memo");
+        //eosio_assert(sep_count == 5, "invalid memo");
+        eosio_assert(sep_count == 4, "invalid memo");
 
         size_t pos;
         string container;
+        /*
         pos = sub2sep(memo, &container, '-', 0, true);
         eosio_assert(!container.empty(), "no roll under");
         *roll_under = stoi(container);
-        pos = sub2sep(memo, &container, '-', ++pos, true);
+        */
+        //pos = sub2sep(memo, &container, '-', ++pos, true);
+        pos = sub2sep(memo, &container, '-', 0, true);
         eosio_assert(!container.empty(), "no seed hash");
         *seed_hash = hex_to_sha256(container);
         pos = sub2sep(memo, &container, '-', ++pos, true);
@@ -63,12 +69,18 @@ class fairdicegame : public contract {
         eosio_assert(!container.empty(), "no signature");
         *sig = str_to_sig(container);
     }
-
-    uint8_t compute_random_roll(const checksum256& seed1, const checksum160& seed2) {
+    uint8_t compute_random_roll(const checksum256& seed1, const checksum160& seed2, uint8_t (&random_roll)[6]) {
         size_t hash = 0;
         hash_combine(hash, sha256_to_hex(seed1));
         hash_combine(hash, sha1_to_hex(seed2));
-        return hash % 100 + 1;
+
+        random_roll[0] = hash % 6 + 1;
+        random_roll[1] = (hash >> 1) % 6 + 1;
+        random_roll[2] = (hash >> 2) % 6 + 1;
+        random_roll[3] = (hash >> 3) % 6 + 1;
+        random_roll[4] = (hash >> 4) % 6 + 1;
+        random_roll[5] = (hash >> 5) % 6 + 1;
+        return 0;
     }
 
     asset compute_referrer_reward(const st_bet& bet) { return bet.amount / 200; }
@@ -88,7 +100,7 @@ class fairdicegame : public contract {
         memo.append(" player: ");
         string player = name{bet.player}.to_string();
         memo.append(player);
-        memo.append(" referral reward! - dapp.pub/dice/");
+        memo.append(" referral reward! ");
         return memo;
     }
 
@@ -99,7 +111,7 @@ class fairdicegame : public contract {
         memo.append(" player: ");
         string player = name{bet.player}.to_string();
         memo.append(player);
-        memo.append(" winner! - dapp.pub/dice/");
+        memo.append(" congratulations! ");
         return memo;
     }
 
@@ -143,11 +155,12 @@ class fairdicegame : public contract {
         eosio_assert(quantity.amount >= 1000, "transfer quantity must be greater than 0.1");
     }
 
-    void assert_roll_under(const uint8_t& roll_under, const asset& quantity) {
-        eosio_assert(roll_under >= 2 && roll_under <= 96,
+    void assert_roll_under(/* const uint8_t& roll_under , */ const asset& quantity) {
+        /* eosio_assert(roll_under >= 2 && roll_under <= 96,
                      "roll under overflow, must be greater than 2 and less than 96");
-        eosio_assert(
-            max_payout(roll_under, quantity) <= max_bonus(),
+        */
+         eosio_assert(
+            max_payout(/* roll_under, */ quantity) <= max_bonus(),
             "offered overflow, expected earning is greater than the maximum bonus");
     }
 
@@ -157,7 +170,7 @@ class fairdicegame : public contract {
             r.player = bet.player;
             r.referrer = bet.referrer;
             r.amount = bet.amount;
-            r.roll_under = bet.roll_under;
+            /* r.roll_under = bet.roll_under; */
             r.seed_hash = bet.seed_hash;
             r.user_seed_hash = bet.user_seed_hash;
             r.created_at = bet.created_at;
@@ -179,15 +192,89 @@ class fairdicegame : public contract {
         _fund_pool.set(pool, _self);
     }
 
-    asset compute_payout(const uint8_t& roll_under, const asset& offer) {
-        return min(max_payout(roll_under, offer), max_bonus());
-    }
-    asset max_payout(const uint8_t& roll_under, const asset& offer) {
-        const double ODDS = 98.0 / ((double)roll_under - 1.0);
-        return asset(ODDS * offer.amount, offer.symbol);
+    asset compute_payout(/* const uint8_t& roll_under, */ const uint8_t (&random_roll)[6] , const asset& offer) {
+        uint8_t one_count = 0;
+        uint8_t two_count = 0;
+        uint8_t three_count = 0;
+        uint8_t four_count = 0;
+        uint8_t five_count = 0;
+        uint8_t six_count = 0;
+        for(int i = 0; i < sizeof(random_roll); i++) {
+            uint8_t roll_number = random_roll[i];
+            switch(roll_number){
+                case 1:
+                    one_count++;
+                    break;
+                case 2:
+                    two_count++;
+                    break;
+                case 3:
+                    three_count++;
+                    break;
+                case 4:
+                    four_count++;
+                    break;
+                case 5:
+                    five_count++;
+                    break;
+                case 6:
+                    six_count++;
+                    break;
+                default:
+                    eosio::print("roll number must be between 1 and 6\n");
+            }
+        }
+// calculate result
+        asset payout = asset(0, offer.symbol);
+        if (six_count == 6 || five_count == 6 || three_count == 6 || two_count == 6) {
+            payout.amount = offer.amount * GUANDENGQIANG;
+        }
+        else if(four_count == 6){
+            payout.amount = offer.amount * LIUBEIHONG;
+        }
+        else if(four_count == 4 && one_count == 2){
+            payout.amount = offer.amount * CHAJINHUA;
+        }
+        else if(one_count == 6){
+            payout.amount = offer.amount * BIANDIJIN;
+        }
+        else if(four_count == 5){
+            payout.amount = offer.amount * WUHONG;
+        }
+        else if(six_count == 5 || five_count == 5 || three_count == 5 || two_count == 5 || one_count == 5){
+            payout.amount = offer.amount * WUZIDENGKE;
+        }
+        else if(four_count == 4){
+            payout.amount = offer.amount * SIDIANHONG;
+        }
+        else if(one_count == 1 && two_count == 1 && three_count == 1 && four_count == 1 && five_count == 1 && six_count == 1){
+            payout.amount = offer.amount * DUITANG;
+        }
+        else if(four_count == 3){
+            payout.amount = offer.amount * SANHONG;
+        }
+        else if(three_count == 4 || two_count == 4 || one_count == 4){
+            payout.amount = offer.amount * SIJIN;
+        }
+        else if(four_count == 2){
+            payout.amount = offer.amount * ERJU;
+        }
+        else if(four_count == 1){
+            payout.amount = offer.amount * YIXIU;
+        }
+        else{
+            payout.amount = 0;
+        }
+        return min(payout, max_bonus());
     }
 
-    asset max_bonus() { return available_balance() / 100; }
+    asset max_payout(/* const uint8_t& roll_under, */ const asset& offer) {
+//      const double ODDS = 98.0 / ((double)roll_under - 1.0);
+        //max pay amount can be awarded.
+        return asset(MAX_RATIO * offer.amount, offer.symbol);
+    }
+
+    asset max_bonus() { return available_balance() / 10; }
 
     asset available_balance() {
         auto token = eosio::token(N(eosio.token));
@@ -204,23 +291,25 @@ class fairdicegame : public contract {
         return _fund_pool.get_or_create(_self, fund_pool);
     }
 
-    void assert_signature(const uint8_t& roll_under,
+    void assert_signature(/* const uint8_t& roll_under, */
                           const checksum256& seed_hash,
                           const uint64_t& expiration,
                           const account_name& referrer,
                           const signature& sig) {
-        string data = uint64_string(roll_under);
-        data += "-";
-        data += sha256_to_hex(seed_hash);
+        /* string data = uint64_string(roll_under);
+        data += "-"; */
+        string data = sha256_to_hex(seed_hash);
         data += "-";
         data += uint64_string(expiration);
         data += "-";
         data += name{referrer}.to_string();
-
+        eosio::print("assert_signature data:", data);
         checksum256 digest;
         const char* data_cstr = data.c_str();
         sha256(data_cstr, strlen(data_cstr), &digest);
+        printhex( &digest, sizeof(digest) );
         public_key key = str_to_pub(PUB_KEY, false);
+        eosio::print("public key", PUB_KEY);
         assert_recover_key(&digest,
                            (char*)&sig.data,
                            sizeof(sig.data),
@@ -246,7 +335,6 @@ class fairdicegame : public contract {
 extern "C" {
 void apply(uint64_t receiver, uint64_t code, uint64_t action) {
     fairdicegame thiscontract(receiver);
-
     if ((code == N(eosio.token)) && (action == N(transfer))) {
         execute_action(&thiscontract, &fairdicegame::transfer);
         return;

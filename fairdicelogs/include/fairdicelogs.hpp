@@ -14,7 +14,7 @@ struct st_bet {
     account_name player;
     account_name referrer;
     asset amount;
-    uint8_t roll_under;
+    /* uint8_t roll_under; */
     checksum256 seed_hash;
     checksum160 user_seed_hash;
     uint64_t created_at;
@@ -25,8 +25,13 @@ struct st_result {
     account_name player;
     account_name referrer;
     asset amount;
-    uint8_t roll_under;
-    uint8_t random_roll;
+    /* uint8_t roll_under; */
+    uint8_t random_roll_1;
+    uint8_t random_roll_2;
+    uint8_t random_roll_3;
+    uint8_t random_roll_4;
+    uint8_t random_roll_5;
+    uint8_t random_roll_6;
     checksum256 seed;
     checksum256 seed_hash;
     checksum160 user_seed_hash;

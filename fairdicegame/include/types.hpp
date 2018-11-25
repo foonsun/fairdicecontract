@@ -3,9 +3,25 @@
 #define EOS_SYMBOL S(4, EOS)
 #define REVEALER N(gamerevealer)
 #define LOG N(fairdicelogs)
+#define MAX_RATIO (50)
+
+#define GUANDENGQIANG (50)
+#define LIUBEIHONG (20)
+#define CHAJINHUA (10)
+#define BIANDIJIN (8)
+#define WUHONG (5)
+#define WUZIDENGKE (4)
+#define SIDIANHONG (3)
+#define DUITANG (2.5)
+#define SANHONG (2)
+#define SIJIN (1.8)
+#define ERJU (1.5)
+#define YIXIU (1)
 
 static const string PUB_KEY =
     "EOS4wpa8kRBbZof9JEpPAAgbnN65NhbBobW4x5gyxQoFfamhQCAMX";
+
+
 
 // @abi table bets i64
 struct st_bet {
@@ -13,7 +29,7 @@ struct st_bet {
     account_name player;
     account_name referrer;
     asset amount;
-    uint8_t roll_under;
+    //uint8_t roll_under;
     checksum256 seed_hash;
     checksum160 user_seed_hash;
     uint64_t created_at;
@@ -25,8 +41,13 @@ struct st_result {
     account_name player;
     account_name referrer;
     asset amount;
-    uint8_t roll_under;
-    uint8_t random_roll;
+    //uint8_t roll_under;
+    uint8_t random_roll_1;
+    uint8_t random_roll_2;
+    uint8_t random_roll_3;
+    uint8_t random_roll_4;
+    uint8_t random_roll_5;
+    uint8_t random_roll_6;
     checksum256 seed;
     checksum256 seed_hash;
     checksum160 user_seed_hash;
