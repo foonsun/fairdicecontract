@@ -9,17 +9,6 @@ void fairdicegame::reveal(const uint64_t& id, const checksum256& seed) {
     compute_random_roll(seed, bet.user_seed_hash, random_roll);
     asset payout = asset(0, EOS_SYMBOL);
 
-    /*
-    if (random_roll < bet.roll_under) {
-        payout = compute_payout(bet.roll_under, bet.amount);
-        action(permission_level{_self, N(active)},
-               N(eosio.token),
-               N(transfer),
-               make_tuple(_self, bet.player, payout, winner_memo(bet)))
-            .send();
-    }
-    */
-
     payout = compute_payout(random_roll, bet.amount);
     if(payout.amount > 0) {
         action(permission_level{_self, N(active)},
@@ -55,7 +44,6 @@ void fairdicegame::reveal(const uint64_t& id, const checksum256& seed) {
                      .seed_hash = bet.seed_hash,
                      .user_seed_hash = bet.user_seed_hash,
                      .payout = payout};
-
     send_defer_action(permission_level{_self, N(active)},
                       LOG,
                       N(result),
@@ -66,8 +54,6 @@ void fairdicegame::transfer(const account_name& from,
                             const account_name& to,
                             const asset& quantity,
                             const string& memo) {
-    eosio::print("mooncakegambling transfer ", eosio::name{from}, " to ", eosio::name{to}, " symbol ", quantity.symbol,\
-    " amount ", quantity.amount, " memo ", memo);
     if (from == _self || to != _self) {
         return;
     }
@@ -117,7 +103,4 @@ void fairdicegame::transfer(const account_name& from,
 
 void fairdicegame::receipt(const st_bet& bet) {
     require_auth(_self);
-    eosio::print("bet.id",bet.id);
-    printhex(&bet.seed_hash, sizeof(bet.seed_hash));
-    print(bet.amount);
 }

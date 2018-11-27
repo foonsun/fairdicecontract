@@ -271,6 +271,7 @@ class fairdicegame : public contract {
     asset max_payout(/* const uint8_t& roll_under, */ const asset& offer) {
 //      const double ODDS = 98.0 / ((double)roll_under - 1.0);
         //max pay amount can be awarded.
+        print("\nmax_payout\n",(MAX_RATIO*offer.amount));
         return asset(MAX_RATIO * offer.amount, offer.symbol);
     }
 
@@ -281,7 +282,9 @@ class fairdicegame : public contract {
         const asset balance =
             token.get_balance(_self, symbol_type(EOS_SYMBOL).name());
         const asset locked = get_fund_pool().locked;
+        print("\nlocked \n", locked.amount);
         const asset available = balance - locked;
+        print("\navaiable \n", available.amount);
         eosio_assert(available.amount >= 0, "fund pool overdraw");
         return available;
     }
@@ -303,13 +306,10 @@ class fairdicegame : public contract {
         data += uint64_string(expiration);
         data += "-";
         data += name{referrer}.to_string();
-        eosio::print("assert_signature data:", data);
         checksum256 digest;
         const char* data_cstr = data.c_str();
         sha256(data_cstr, strlen(data_cstr), &digest);
-        printhex( &digest, sizeof(digest) );
         public_key key = str_to_pub(PUB_KEY, false);
-        eosio::print("public key", PUB_KEY);
         assert_recover_key(&digest,
                            (char*)&sig.data,
                            sizeof(sig.data),
