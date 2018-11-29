@@ -70,16 +70,26 @@ class fairdicegame : public contract {
         *sig = str_to_sig(container);
     }
     uint8_t compute_random_roll(const checksum256& seed1, const checksum160& seed2, uint8_t (&random_roll)[6]) {
+
         size_t hash = 0;
         hash_combine(hash, sha256_to_hex(seed1));
         hash_combine(hash, sha1_to_hex(seed2));
-
         random_roll[0] = hash % 6 + 1;
-        random_roll[1] = (hash >> 1) % 6 + 1;
-        random_roll[2] = (hash >> 2) % 6 + 1;
-        random_roll[3] = (hash >> 3) % 6 + 1;
-        random_roll[4] = (hash >> 4) % 6 + 1;
-        random_roll[5] = (hash >> 5) % 6 + 1;
+        hash_combine(hash, sha256_to_hex(seed1));
+        hash_combine(hash, sha1_to_hex(seed2));
+        random_roll[1] = hash % 6 + 1;
+        hash_combine(hash, sha256_to_hex(seed1));
+        hash_combine(hash, sha1_to_hex(seed2));
+        random_roll[2] = hash % 6 + 1;
+        hash_combine(hash, sha256_to_hex(seed1));
+        hash_combine(hash, sha1_to_hex(seed2));
+        random_roll[3] = hash % 6 + 1;
+        hash_combine(hash, sha256_to_hex(seed1));
+        hash_combine(hash, sha1_to_hex(seed2));
+        random_roll[4] = hash % 6 + 1;
+        hash_combine(hash, sha256_to_hex(seed1));
+        hash_combine(hash, sha1_to_hex(seed2));
+        random_roll[5] = hash % 6 + 1;
         return 0;
     }
 
