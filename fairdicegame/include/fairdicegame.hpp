@@ -263,7 +263,7 @@ class fairdicegame : public contract {
         else if(four_count == 3){
             payout.amount = offer.amount * SANHONG;
         }
-        else if(three_count == 4 || two_count == 4 || one_count == 4){
+        else if(three_count == 4 || two_count == 4 || one_count == 4 || five_count == 4 || six_count == 4){
             payout.amount = offer.amount * SIJIN;
         }
         else if(four_count == 2){
