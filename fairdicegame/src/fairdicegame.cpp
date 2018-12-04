@@ -44,8 +44,21 @@ void fairdicegame::reveal(const uint64_t& id, const checksum256& seed) {
                      .seed_hash = bet.seed_hash,
                      .user_seed_hash = bet.user_seed_hash,
                      .payout = payout};
+    /*
     send_defer_action(permission_level{_self, N(active)},
                       LOG,
+                      N(result),
+                      result);
+    */
+    /*
+    action(permission_level{_self, N(active)},
+           _self,
+           N(result),
+           result)
+            .send();
+    */
+    send_defer_action(permission_level{_self, N(active)},
+                      _self,
                       N(result),
                       result);
 }
@@ -105,6 +118,11 @@ void fairdicegame::transfer(const account_name& from,
 
 void fairdicegame::receipt(const st_bet& bet) {
     require_auth(_self);
+}
+
+void fairdicegame::result(const st_result& result) {
+    require_auth(_self);
+    require_recipient(result.player);
 }
 
 void fairdicegame::equity(const asset& quantity) {

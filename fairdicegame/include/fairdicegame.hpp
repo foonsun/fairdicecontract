@@ -23,6 +23,9 @@ class fairdicegame : public contract {
     void reveal(const uint64_t& id, const checksum256& seed);
 
     // @abi action
+    void result(const st_result& result);
+
+    // @abi action
     void equity(const asset& quantity);
 
    private:
@@ -288,20 +291,17 @@ class fairdicegame : public contract {
     asset max_payout(/* const uint8_t& roll_under, */ const asset& offer) {
 //      const double ODDS = 98.0 / ((double)roll_under - 1.0);
         //max pay amount can be awarded.
-        print("\nmax_payout\n",(MAX_RATIO*offer.amount));
         return asset(MAX_RATIO * offer.amount, offer.symbol);
     }
 
-    asset max_bonus() { return available_balance() / 10; }
+    asset max_bonus() { return available_balance() / 2; }
 
     asset available_balance() {
         auto token = eosio::token(N(eosio.token));
         const asset balance =
             token.get_balance(_self, symbol_type(EOS_SYMBOL).name());
         const asset locked = get_fund_pool().locked;
-        print("\nlocked \n", locked.amount);
         const asset available = balance - locked;
-        print("\navaiable \n", available.amount);
         eosio_assert(available.amount >= 0, "fund pool overdraw");
         return available;
     }
@@ -370,7 +370,7 @@ void apply(uint64_t receiver, uint64_t code, uint64_t action) {
 
     if (code != receiver) return;
 
-    switch (action) { EOSIO_API(fairdicegame, (receipt)(reveal)) };
+    switch (action) { EOSIO_API(fairdicegame, (receipt)(reveal)(result)(equity)) };
     eosio_exit(0);
 }
 }

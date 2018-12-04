@@ -31,7 +31,7 @@ endif()
 include_directories(AFTER ${BOOST_ROOT}/include)
 
 add_subdirectory(${CMAKE_PROJECT_NAME})
-add_subdirectory(fairdicelogs)
+#add_subdirectory(fairdicelogs)
 
 if (APPLE)
     set(OPENSSL_ROOT "/usr/local/opt/openssl")
