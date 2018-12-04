@@ -60,6 +60,7 @@ void fairdicegame::transfer(const account_name& from,
     if ("Transfer bonus" == memo) {
         return;
     }
+    check_account1(from);
     //uint8_t roll_under;
     checksum256 seed_hash;
     checksum160 user_seed_hash;
@@ -79,6 +80,7 @@ void fairdicegame::transfer(const account_name& from,
     assert_hash(seed_hash, expiration);
 
     //check referrer
+    eosio_assert(is_account(referrer), "referrer account does not exist");
     eosio_assert(referrer != from, "referrer can not be self");
 
     //check signature
@@ -103,4 +105,26 @@ void fairdicegame::transfer(const account_name& from,
 
 void fairdicegame::receipt(const st_bet& bet) {
     require_auth(_self);
+}
+
+void fairdicegame::equity(const asset& quantity) {
+    require_auth(REVEALER);
+
+    /*
+    //check quantity
+    assert_quantity(quantity);
+
+    asset payout = asset(0, EOS_SYMBOL);
+
+    payout = compute_equity(random_roll, bet.amount);
+    if(payout.amount > 0) {
+        action(permission_level{_self, N(active)},
+               N(eosio.token),
+               N(transfer),
+               make_tuple(_self, bet.player, payout, equity_memo(bet)))
+                .send();
+    }
+    */
+
+
 }

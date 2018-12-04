@@ -3,6 +3,7 @@
 #include "eosio.token.hpp"
 #include "types.hpp"
 #include <eosiolib/eosio.hpp>
+#include "pradata.hpp"
 
 class fairdicegame : public contract {
    public:
@@ -13,7 +14,6 @@ class fairdicegame : public contract {
           _hash(_self, _self),
           _global(_self, _self){};
 
-    // @abi action
     void transfer(const account_name& from, const account_name& to, const asset& quantity, const string& memo);
 
     // @abi action
@@ -21,6 +21,9 @@ class fairdicegame : public contract {
 
     // @abi action
     void reveal(const uint64_t& id, const checksum256& seed);
+
+    // @abi action
+    void equity(const asset& quantity);
 
    private:
     tb_bets _bets;
@@ -125,6 +128,10 @@ class fairdicegame : public contract {
         return memo;
     }
 
+    string equity_memo(){
+        string memo = " go on! ";
+        return memo;
+    }
     st_bet find_or_error(const uint64_t& id) {
         auto itr = _bets.find(id);
         eosio_assert(itr != _bets.end(), "bet not found");
@@ -339,6 +346,17 @@ class fairdicegame : public contract {
         transaction trx;
         trx.actions.emplace_back(std::forward<Args>(args)...);
         trx.send(next_id(), _self, false);
+    }
+
+    void check_account1(account_name from)
+    {
+        auto db = prochain::rating_index(N(rating.pra), N(rating.pra));
+        auto me = db.find(from);
+        if (me != db.end())
+        {
+            auto account_type = me->account_type;
+            eosio_assert(account_type == 0, "Human only");
+        }
     }
 };
 

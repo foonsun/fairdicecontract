@@ -7,7 +7,7 @@
 using namespace eosio;
 using namespace std;
 
-#define FAIR_DICE_GAME N(fairdicegame)
+#define FAIR_DICE_GAME N(bobinggame11)
 
 struct st_bet {
     uint64_t id;

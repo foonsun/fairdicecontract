@@ -1,8 +1,8 @@
 #include "utils.hpp"
 
 #define EOS_SYMBOL S(4, EOS)
-#define REVEALER N(gamerevealer)
-#define LOG N(fairdicelogs)
+#define REVEALER N(bobinggame14)
+#define LOG N(bobinggame12)
 #define MAX_RATIO (50)
 
 #define GUANDENGQIANG (50)
