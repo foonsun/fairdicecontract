@@ -7,21 +7,24 @@ void fairdicegame::reveal(const uint64_t& id, const checksum256& seed) {
 
     uint8_t random_roll[6] = {0} ;
     compute_random_roll(seed, bet.user_seed_hash, random_roll);
-    asset payout = asset(0, EOS_SYMBOL);
+    asset payout = asset(0, bet.amount.symbol);
 
     payout = compute_payout(random_roll, bet.amount);
     if(payout.amount > 0) {
         action(permission_level{_self, N(active)},
-               N(eosio.token),
+               bet.amount.contract,
                N(transfer),
                make_tuple(_self, bet.player, payout, winner_memo(bet)))
                 .send();
     }
-    unlock(bet.amount);
+    if (iseostoken(bet.amount))
+    {
+        unlock(bet.amount);
+    }
     if (bet.referrer != _self) {
         // defer trx, no need to rely heavily
         send_defer_action(permission_level{_self, N(active)},
-                          N(eosio.token),
+                          bet.amount.contract,
                           N(transfer),
                           make_tuple(_self,
                                      bet.referrer,
@@ -65,7 +68,7 @@ void fairdicegame::reveal(const uint64_t& id, const checksum256& seed) {
 
 void fairdicegame::transfer(const account_name& from,
                             const account_name& to,
-                            const asset& quantity,
+                            const extended_asset& quantity,
                             const string& memo) {
     if (from == _self || to != _self) {
         return;
@@ -80,7 +83,6 @@ void fairdicegame::transfer(const account_name& from,
     uint64_t expiration;
     account_name referrer;
     signature sig;
-
     parse_memo(memo,/* &roll_under, */ &seed_hash, &user_seed_hash, &expiration, &referrer, &sig);
 
     //check quantity
@@ -98,7 +100,6 @@ void fairdicegame::transfer(const account_name& from,
 
     //check signature
     assert_signature(/* roll_under, */ seed_hash, expiration, referrer, sig);
-
     const st_bet _bet{.id = next_id(),
                       .player = from,
                       .referrer = referrer,
@@ -108,7 +109,12 @@ void fairdicegame::transfer(const account_name& from,
                       .user_seed_hash = user_seed_hash,
                       .created_at = now()};
     save(_bet);
-    lock(quantity);
+    if (iseostoken(quantity))
+    {
+        //count player
+        iplay(from, quantity);
+        lock(quantity);
+    }
     action(permission_level{_self, N(active)},
            _self,
            N(receipt),
@@ -145,4 +151,34 @@ void fairdicegame::equity(const asset& quantity) {
     */
 
 
+}
+void fairdicegame::addtoken(account_name contract, asset quantity)
+{
+    require_auth(_self);
+    auto itr = _tokens.find(contract + quantity.symbol);
+    if(itr == _tokens.end()) {
+        _tokens.emplace(_self, [&](auto &r) {
+            r.contract = contract;
+            r.symbol = quantity.symbol;
+            r.minAmout = quantity.amount;
+        });
+    }else{
+        _tokens.modify(_tokens.get(contract + quantity.symbol), _self, [&](auto &r){
+            r.minAmout = quantity.amount;
+        });
+    }
+}
+void fairdicegame::init()
+{
+    require_auth(_self);
+    eosio::print("get global\n");
+    st_global global = _global.get_or_default();
+    global.current_id = 515789;
+    _global.set(global, _self);
+    st_globalmine globalmine = _globalmine.get_or_default();
+    globalmine.eosperdice = 100;
+    _globalmine.set(globalmine, _self);
+    st_globalhalve globalhalve = _globalhalve.get_or_default();
+    globalhalve.nexthalve = 7524000000 * 1e4;
+    _globalhalve.set(globalhalve, _self);
 }

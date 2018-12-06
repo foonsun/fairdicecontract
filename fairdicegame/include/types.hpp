@@ -27,7 +27,7 @@ struct st_bet {
     uint64_t id;
     account_name player;
     account_name referrer;
-    asset amount;
+    extended_asset amount;
     //uint8_t roll_under;
     checksum256 seed_hash;
     checksum160 user_seed_hash;
@@ -39,7 +39,7 @@ struct st_result {
     uint64_t bet_id;
     account_name player;
     account_name referrer;
-    asset amount;
+    extended_asset amount;
     //uint8_t roll_under;
     uint8_t random_roll_1;
     uint8_t random_roll_2;
@@ -71,11 +71,49 @@ struct st_fund_pool {
 struct st_global {
     uint64_t current_id;
 };
+// @abi table tokens i64
+struct st_tokens
+{
+    account_name contract; // 合约账号
+    symbol_type symbol;    // 代币名称
+    uint64_t minAmout;     //最小允许投注的值
+    uint64_t primary_key() const { return contract + symbol; }
+};
 
+// @abi table users1 i64
+struct st_user1
+{
+    asset amount = asset(0, EOS_SYMBOL);
+    uint32_t count = 0;
+};
+
+// @abi table users i64
+struct st_user
+{
+    account_name owner;
+    asset amount;
+    uint32_t count;
+    uint64_t primary_key() const { return owner; }
+};
+
+// @abi table mine i64
+struct st_globalmine {
+    double eosperdice;
+};
+
+// @abi table halve i64
+struct st_globalhalve {
+    uint64_t nexthalve;
+};
+
+typedef singleton<N(users1), st_user1> tb_users1;
+typedef multi_index<N(tokens), st_tokens> tb_tokens;
 typedef multi_index<N(bets), st_bet>
     tb_bets;
 typedef singleton<N(fundpool), st_fund_pool> tb_fund_pool;
 typedef singleton<N(global), st_global> tb_global;
+typedef singleton<N(mine), st_globalmine> tb_globalmine;
+typedef singleton<N(halve), st_globalhalve> tb_globalhalve;
 typedef multi_index<
     N(hash),
     st_hash,
