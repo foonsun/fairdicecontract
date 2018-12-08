@@ -171,14 +171,13 @@ void fairdicegame::addtoken(account_name contract, asset quantity)
 void fairdicegame::init()
 {
     require_auth(_self);
-    eosio::print("get global\n");
     st_global global = _global.get_or_default();
-    global.current_id = 515789;
+    global.current_id = 1;
     _global.set(global, _self);
     st_globalmine globalmine = _globalmine.get_or_default();
-    globalmine.eosperdice = 100;
+    globalmine.eosperdice = 10;
     _globalmine.set(globalmine, _self);
     st_globalhalve globalhalve = _globalhalve.get_or_default();
-    globalhalve.nexthalve = 7524000000 * 1e4;
+    globalhalve.nexthalve = 1 * 1e8 * 1e4;
     _globalhalve.set(globalhalve, _self);
 }
