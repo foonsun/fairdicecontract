@@ -14,9 +14,7 @@ class fairdicegame : public contract {
           _hash(_self, _self),
           _users(_self, _self),
           _tokens(_self, _self),
-          _global(_self, _self),
-          _globalmine(_self, _self),
-          _globalhalve(_self, _self){};
+          _global(_self, _self){}
 
     void transfer(const account_name& from, const account_name& to, const extended_asset& quantity, const string& memo);
 
@@ -45,8 +43,6 @@ class fairdicegame : public contract {
     tb_fund_pool _fund_pool;
     tb_hash _hash;
     tb_global _global;
-    tb_globalmine _globalmine;
-    tb_globalhalve _globalhalve;
     tb_tokens _tokens;
     tb_users1 _users;
     void parse_memo(string memo,

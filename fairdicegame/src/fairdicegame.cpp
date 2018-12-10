@@ -171,13 +171,21 @@ void fairdicegame::addtoken(account_name contract, asset quantity)
 void fairdicegame::init()
 {
     require_auth(_self);
+    //empty bets table
+    for(auto itr = _bets.begin(); itr != _bets.end();) {
+        itr = _bets.erase(itr);
+    }
+    //empty hash table
+    for(auto itr = _hash.begin(); itr != _hash.end();) {
+        itr = _hash.erase(itr);
+    }
+    //empty global table
+    _global.remove();
+
     st_global global = _global.get_or_default();
     global.current_id = 1;
+    global.eosperdice = 10;
+    global.nexthalve = 1 * 1e8 * 1e4;
+    global.initStatu = 1;
     _global.set(global, _self);
-    st_globalmine globalmine = _globalmine.get_or_default();
-    globalmine.eosperdice = 10;
-    _globalmine.set(globalmine, _self);
-    st_globalhalve globalhalve = _globalhalve.get_or_default();
-    globalhalve.nexthalve = 1 * 1e8 * 1e4;
-    _globalhalve.set(globalhalve, _self);
 }

@@ -70,6 +70,9 @@ struct st_fund_pool {
 // @abi table global i64
 struct st_global {
     uint64_t current_id;
+    double eosperdice;
+    uint64_t nexthalve;
+    uint64_t initStatu;
 };
 // @abi table tokens i64
 struct st_tokens
@@ -96,24 +99,12 @@ struct st_user
     uint64_t primary_key() const { return owner; }
 };
 
-// @abi table mine i64
-struct st_globalmine {
-    double eosperdice;
-};
-
-// @abi table halve i64
-struct st_globalhalve {
-    uint64_t nexthalve;
-};
-
 typedef singleton<N(users1), st_user1> tb_users1;
 typedef multi_index<N(tokens), st_tokens> tb_tokens;
 typedef multi_index<N(bets), st_bet>
     tb_bets;
 typedef singleton<N(fundpool), st_fund_pool> tb_fund_pool;
 typedef singleton<N(global), st_global> tb_global;
-typedef singleton<N(mine), st_globalmine> tb_globalmine;
-typedef singleton<N(halve), st_globalhalve> tb_globalhalve;
 typedef multi_index<
     N(hash),
     st_hash,
