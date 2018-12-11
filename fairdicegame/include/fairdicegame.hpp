@@ -307,7 +307,7 @@ class fairdicegame : public contract {
         return asset(MAX_RATIO * offer.amount, offer.symbol);
     }
 
-    asset max_bonus(const extended_asset &quantity) { return available_balance(quantity) / 10; }
+    asset max_bonus(const extended_asset &quantity) { return available_balance(quantity) / 2; }
 
     asset available_balance(const extended_asset &quantity) {
         auto token = eosio::token(quantity.contract);
