@@ -36,6 +36,9 @@ class fairdicegame : public contract {
     // @abi action
     void init();
 
+    // @abi action
+    void clear(string table, uint32_t numbers);
+
     void apply(account_name code, action_name action);
 
    private:
@@ -157,7 +160,7 @@ class fairdicegame : public contract {
         const uint32_t _now = now();
 
         // check expiratin
-        eosio_assert(expiration > _now, "seed hash expired");
+        eosio_assert(expiration > _now*1000, "seed hash expired");
 
         // check hash duplicate
         const uint64_t key = uint64_hash(seed_hash);
@@ -424,7 +427,7 @@ void fairdicegame::apply(account_name code, action_name action)
         return;
     switch (action)
     {
-        EOSIO_API(fairdicegame, (receipt)(reveal)(result)(equity)(init)(addtoken));
+        EOSIO_API(fairdicegame, (receipt)(reveal)(result)(equity)(init)(addtoken)(clear));
     };
 }
 
