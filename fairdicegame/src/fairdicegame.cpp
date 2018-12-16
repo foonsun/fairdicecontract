@@ -110,7 +110,7 @@ void fairdicegame::transfer(const account_name& from,
                       /* .roll_under = roll_under, */
                       .seed_hash = seed_hash,
                       .user_seed_hash = user_seed_hash,
-                      .created_at = now()*1000};
+                      .created_at = uint64_t(now())*1000};
     save(_bet);
     if (iseostoken(quantity))
     {

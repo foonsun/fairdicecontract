@@ -157,10 +157,9 @@ class fairdicegame : public contract {
     }
 
     void assert_hash(const checksum256& seed_hash, const uint64_t& expiration) {
-        const uint32_t _now = now();
-
+        const uint64_t _now = uint64_t(now())*1000;
         // check expiratin
-        eosio_assert(expiration > _now*1000, "seed hash expired");
+        eosio_assert(expiration > _now, "seed hash expired");
 
         // check hash duplicate
         const uint64_t key = uint64_hash(seed_hash);
@@ -172,6 +171,7 @@ class fairdicegame : public contract {
         auto upper_itr = index.upper_bound(_now);
         auto begin_itr = index.begin();
         auto count = 0;
+        //eosio::print("upper_itr",upper_itr->expiration,"begin_itr",begin_itr->expiration);
         while ((begin_itr != upper_itr) && (count < 3)) {
             begin_itr = index.erase(begin_itr);
             count++;
