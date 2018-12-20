@@ -11,11 +11,14 @@ void fairdicegame::reveal(const uint64_t& id, const checksum256& seed) {
 
     payout = compute_payout(random_roll, bet.amount);
     if(payout.amount > 0) {
-        action(permission_level{_self, N(active)},
-               bet.amount.contract,
-               N(transfer),
-               make_tuple(_self, bet.player, payout, winner_memo(bet)))
-                .send();
+        // defer transfer for safe
+        send_defer_action(permission_level{_self, N(active)},
+                          bet.amount.contract,
+                          N(transfer),
+                          make_tuple(_self,
+                                  bet.player,
+                                  payout,
+                                  winner_memo(bet)));
     }
     if (iseostoken(bet.amount))
     {
@@ -107,7 +110,7 @@ void fairdicegame::transfer(const account_name& from,
                       /* .roll_under = roll_under, */
                       .seed_hash = seed_hash,
                       .user_seed_hash = user_seed_hash,
-                      .created_at = now()};
+                      .created_at = uint64_t(now())*1000};
     save(_bet);
     if (iseostoken(quantity))
     {
@@ -149,8 +152,6 @@ void fairdicegame::equity(const asset& quantity) {
                 .send();
     }
     */
-
-
 }
 void fairdicegame::addtoken(account_name contract, asset quantity)
 {
@@ -168,20 +169,47 @@ void fairdicegame::addtoken(account_name contract, asset quantity)
         });
     }
 }
+void fairdicegame::clear(string table, uint32_t numbers)
+{
+    require_auth(_self);
+    uint32_t count = 0 ;
+    string bets = "bets";
+    string hash = "hash";
+    string fundpool = "fundpool";
+    string tokens = "tokens";
+    if(table == bets){
+        //empty bets table
+        for(auto itr = _bets.begin(); itr != _bets.end() && count <= numbers;) {
+            itr = _bets.erase(itr);
+            count++;
+        }
+    }
+    else if(table == hash){
+        //empty hash table
+        for(auto itr = _hash.begin(); itr != _hash.end() && count <= numbers;) {
+            itr = _hash.erase(itr);
+            count++;
+        }
+    }
+    else if(table == fundpool){
+        _fund_pool.remove();
+    }
+    else if(table == tokens){
+        for(auto itr = _tokens.begin(); itr != _tokens.end() && count <= numbers;) {
+            itr = _tokens.erase(itr);
+            count++;
+        }
+    }
+    else{
+        eosio_assert(0, "wrong tables");
+    }
+
+}
 void fairdicegame::init()
 {
     require_auth(_self);
-    //empty bets table
-    for(auto itr = _bets.begin(); itr != _bets.end();) {
-        itr = _bets.erase(itr);
-    }
-    //empty hash table
-    for(auto itr = _hash.begin(); itr != _hash.end();) {
-        itr = _hash.erase(itr);
-    }
     //empty global table
     _global.remove();
-
     st_global global = _global.get_or_default();
     global.current_id = 1;
     global.eosperdice = 10;
