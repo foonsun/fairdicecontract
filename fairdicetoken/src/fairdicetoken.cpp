@@ -7,8 +7,8 @@
 
 namespace eosico {
 
-#define TOKEN_SYMBOL    S(4,KEY)
-#define PHASE_ONE       1500000000
+#define TOKEN_SYMBOL    S(4,MMT)
+#define PHASE_ONE       1000000000
 
     void ico::create( account_name issuer,
                       asset        maximum_supply )
@@ -20,7 +20,7 @@ namespace eosico {
         eosio_assert( maximum_supply.is_valid(), "invalid supply");
         eosio_assert( maximum_supply.amount > 0, "max-supply must be positive");
 
-        eosio_assert( maximum_supply.symbol == TOKEN_SYMBOL, "only can create KEY symbol");
+        eosio_assert( maximum_supply.symbol == TOKEN_SYMBOL, "only can create MMT symbol");
 
         stats statstable( _self, sym.name() );
         auto existing = statstable.find( sym.name() );
@@ -62,6 +62,31 @@ namespace eosico {
         if( to != st.issuer ) {
             SEND_INLINE_ACTION( *this, transfer, {st.issuer,N(active)}, {st.issuer, to, quantity, memo} );
         }
+    }
+
+    void ico::retire( asset quantity, string memo )
+    {
+        auto sym = quantity.symbol;
+        eosio_assert( sym.is_valid(), "invalid symbol name" );
+        eosio_assert( memo.size() <= 256, "memo has more than 256 bytes" );
+
+        auto sym_name = sym.name();
+        stats statstable( _self, sym_name );
+        auto existing = statstable.find( sym_name );
+        eosio_assert( existing != statstable.end(), "token with symbol does not exist" );
+        const auto& st = *existing;
+
+        require_auth( st.issuer );
+        eosio_assert( quantity.is_valid(), "invalid quantity" );
+        eosio_assert( quantity.amount > 0, "must retire positive quantity" );
+
+        eosio_assert( quantity.symbol == st.supply.symbol, "symbol precision mismatch" );
+
+        statstable.modify( st, 0, [&]( auto& s ) {
+            s.supply -= quantity;
+        });
+
+        sub_balance( st.issuer, quantity );
     }
 
     void ico::transfer( account_name from,
@@ -153,7 +178,7 @@ namespace eosico {
         auto existing = statstable.find( symbol_type(TOKEN_SYMBOL).name() );
         eosio_assert( existing != statstable.end(), "token with symbol does not exist, create token before issue" );
 
-        eosio_assert( existing->supply.amount+quantity.amount <= PHASE_ONE, "the key has been sold more than 150000.0000");
+        eosio_assert( existing->supply.amount+quantity.amount <= PHASE_ONE, "the key has been sold more than 1000000000.0000");
 
         SEND_INLINE_ACTION( *this, issue, {existing->issuer,N(active)}, {to, asset{quantity.amount, TOKEN_SYMBOL}, memo} );
 
@@ -164,6 +189,14 @@ namespace eosico {
             a.quant = quantity;
             a.time = time_point_sec(now());
         });
+    }
+
+    void ico::close( account_name owner, symbol_type symbol ) {
+        accounts acnts( _self, owner );
+        auto it = acnts.find( symbol.name() );
+        eosio_assert( it != acnts.end(), "Balance row already deleted or never existed. Action won't have any effect." );
+        eosio_assert( it->balance.amount == 0, "Cannot close because the balance is not zero." );
+        acnts.erase( it );
     }
 
 

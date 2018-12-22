@@ -32,13 +32,18 @@ namespace eosico {
         void issue( account_name to, asset quantity, string memo );
 
         // @abi action
+        void retire( asset quantity, string memo );
+
+        // @abi action
         void transfer( account_name from,
                        account_name to,
                        asset        quantity,
                        string       memo );
 
-        // @abi action
         void buykey(account_name to, asset quantity, string memo);
+
+        // @abi action
+        void close( account_name owner, symbol_type symbol );
 
         inline asset get_supply( symbol_name sym )const;
 
@@ -107,7 +112,8 @@ void apply( uint64_t receiver, uint64_t code, uint64_t action ) {
 
         string func_name_str = memo.substr(0, separator_pos);
         if(0 == func_name_str.compare("buykey")){
-            thiscontract.buykey(tmp.from, tmp.quantity,tmp.memo);
+            // TODO: can be opened if token can be bought.
+            //thiscontract.buykey(tmp.from, tmp.quantity,tmp.memo);
         }else{
             eosio_assert(false, "the memo format is error");
         }
@@ -116,7 +122,7 @@ void apply( uint64_t receiver, uint64_t code, uint64_t action ) {
     else if (code == self  || action == N(onerror) ){
         switch (action)
         {
-            EOSIO_API( eosico::ico, (create)(issue)(transfer) )
+            EOSIO_API( eosico::ico, (create)(issue)(retire)(transfer)(close) )
         }
     }
 }
