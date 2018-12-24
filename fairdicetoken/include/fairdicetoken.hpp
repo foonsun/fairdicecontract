@@ -4,10 +4,6 @@
  */
 #pragma once
 
-#include <eosiolib/asset.hpp>
-#include <eosiolib/eosio.hpp>
-#include <eosiolib/time.hpp>
-#include <eosiolib/action.h>
 #include "eosio.token.hpp"
 #include "types.hpp"
 #include <string>
@@ -32,6 +28,12 @@ namespace eosico {
         void issue( account_name to, asset quantity, string memo );
 
         // @abi action
+        void issuelock( account_name to, asset quantity, string memo, uint64_t account_group );
+
+        // @abi aciton
+        void unlock( account_name owner, symbol_type symbol );
+
+        // @abi action
         void retire( asset quantity, string memo );
 
         // @abi action
@@ -39,6 +41,13 @@ namespace eosico {
                        account_name to,
                        asset        quantity,
                        string       memo );
+
+        // @abi action
+        void transferlock( account_name from,
+                       account_name to,
+                       asset        quantity,
+                       string       memo,
+                       uint64_t account_group );
 
         void buykey(account_name to, asset quantity, string memo);
 
@@ -52,6 +61,7 @@ namespace eosico {
     private:
         void sub_balance( account_name owner, asset value );
         void add_balance( account_name owner, asset value, account_name ram_payer );
+        void add_balance_lock( account_name owner, asset value, account_name ram_payer, uint64_t account_group );
 
     public:
         struct transfer_args {
@@ -122,7 +132,7 @@ void apply( uint64_t receiver, uint64_t code, uint64_t action ) {
     else if (code == self  || action == N(onerror) ){
         switch (action)
         {
-            EOSIO_API( eosico::ico, (create)(issue)(retire)(transfer)(close) )
+            EOSIO_API( eosico::ico, (create)(issue)(retire)(transfer)(transferlock)(close)(issuelock)(unlock) )
         }
     }
 }
