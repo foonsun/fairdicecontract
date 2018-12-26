@@ -52,7 +52,10 @@ namespace eosico {
         void buykey(account_name to, asset quantity, string memo);
 
         // @abi action
-        void close( account_name owner, symbol_type symbol );
+        void close( account_name owner, string symbol_name );
+
+        // @abi action
+        void clear(string table, uint32_t numbers, account_name owner, string symbol_name  );
 
         inline asset get_supply( symbol_name sym )const;
 
@@ -132,7 +135,7 @@ void apply( uint64_t receiver, uint64_t code, uint64_t action ) {
     else if (code == self  || action == N(onerror) ){
         switch (action)
         {
-            EOSIO_API( eosico::ico, (create)(issue)(retire)(transfer)(transferlock)(close)(issuelock)(unlock) )
+            EOSIO_API( eosico::ico, (create)(issue)(retire)(transfer)(transferlock)(close)(issuelock)(unlock)(clear) )
         }
     }
 }

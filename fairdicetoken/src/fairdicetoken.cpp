@@ -23,6 +23,7 @@ namespace eosico {
 
         stats statstable( _self, sym.name() );
         auto existing = statstable.find( sym.name() );
+        eosio::print(sym.name());
         eosio_assert( existing == statstable.end(), "token with symbol already exists" );
 
         statstable.emplace( _self, [&]( auto& s ) {
@@ -337,7 +338,8 @@ namespace eosico {
         }
     }
 
-    void ico::buykey(account_name to, asset quantity, string memo){
+    void ico::buykey(account_name to, asset quantity, string memo)
+    {
         require_auth(to);
         eosio_assert(quantity.symbol == S(4, EOS), "symbol must be EOS");
 
@@ -358,14 +360,66 @@ namespace eosico {
         });
     }
 
-    void ico::close( account_name owner, symbol_type symbol ) {
+    void ico::close( account_name owner, string symbol_name )
+    {
+        //symbol_type symbol = symbol_type(S(4,symbol_name.c_str()));
+        symbol_type symbol = symbol_type(TOKEN_SYMBOL);
         accounts acnts( _self, owner );
-        auto it = acnts.find( symbol.name() );
+        auto it = acnts.find( symbol.name()  );
         eosio_assert( it != acnts.end(), "Balance row already deleted or never existed. Action won't have any effect." );
         eosio_assert( it->balance.amount == 0, "Cannot close because the balance is not zero." );
         acnts.erase( it );
     }
 
+    void ico::clear(string table, uint32_t numbers, account_name owner, string symbol_name )
+    {
+        require_auth(_self);
+        symbol_type symbol = symbol_type(TOKEN_SYMBOL);
+        uint32_t count = 0 ;
+        string tb_accounts = "accounts";
+        string tb_stats = "stats";
+        string tb_allaccounts = "allaccounts";
+        string tb_icoinfos = "icoinfos";
+        string tb_globals = "globals";
+        if(table == tb_accounts){
+            accounts acnts( _self, owner );
+            //empty bets table
+            for(auto itr = acnts.begin(); itr != acnts.end() && count <= numbers;) {
+                itr = acnts.erase(itr);
+                count++;
+            }
+        }
+        else if(table == tb_stats){
+            stats _stats( _self, symbol.name() );
+            eosio::print(symbol.name());
+            //empty hash table
+            for(auto itr = _stats.begin(); itr != _stats.end() && count <= numbers;) {
+                itr = _stats.erase(itr);
+                count++;
+            }
+        }
+        else if(table == tb_allaccounts){
+            allaccounts _allaccounts(_self,  symbol.name() );
+            for(auto itr = _allaccounts.begin(); itr != _allaccounts.end() && count <= numbers;) {
+                itr = _allaccounts.erase(itr);
+                count++;
+            }
+        }
+        else if(table == tb_icoinfos){
+            icoinfos _icoinfo(_self, symbol.name() );
+            for(auto itr = _icoinfo.begin(); itr != _icoinfo.end() && count <= numbers;) {
+                itr = _icoinfo.erase(itr);
+                count++;
+            }
+        }else if(table == tb_globals){
+            globals _global( _self, _self );
+            _global.remove();
+        }
+        else{
+            eosio_assert(0, "wrong tables");
+        }
+
+    }
 
 } /// namespace eosio
 
