@@ -62,6 +62,12 @@ namespace eosico {
         if( to != st.issuer ) {
             SEND_INLINE_ACTION( *this, transfer, {st.issuer,N(active)}, {st.issuer, to, quantity, memo} );
         }
+
+        globals _global( _self, _self );
+        global global = _global.get_or_default();
+        global.mine.symbol = quantity.symbol;
+        global.mine.amount += quantity.amount;
+        _global.set(global, _self);
     }
 
     void ico::issuelock( account_name to, asset quantity, string memo, uint64_t account_group )
@@ -71,6 +77,7 @@ namespace eosico {
         eosio_assert( memo.size() <= 256, "memo has more than 256 bytes" );
 
         auto sym_name = sym.name();
+        eosio::print("sym_name",sym_name);
         stats statstable( _self, sym_name );
         auto existing = statstable.find( sym_name );
         eosio_assert( existing != statstable.end(), "token with symbol does not exist, create token before issue" );
@@ -94,10 +101,12 @@ namespace eosico {
         }
     }
 
-    void ico::unlock( account_name owner, symbol_type symbol ){
-        auto sym_name = symbol.name();
+    void ico::issueunlock( account_name owner)
+    {
+        auto sym_name = symbol_type(TOKEN_SYMBOL).name();
         stats statstable( _self, sym_name );
         auto existing = statstable.find( sym_name );
+        eosio::print(existing->supply);
         eosio_assert( existing != statstable.end(), "token with symbol does not exist" );
         const auto& st = *existing;
         require_auth( st.issuer );
@@ -106,8 +115,8 @@ namespace eosico {
         global global = _global.get_or_default();
         asset mine = global.mine;
 
-        asset quantity = asset(0, symbol);
-        asset value = asset(0, symbol);
+        asset quantity = asset(0, TOKEN_SYMBOL);
+        asset value = asset(0, TOKEN_SYMBOL);
         allaccounts _allaccounts(_self, sym_name);
         const auto& itr = _allaccounts.get( owner, "no balance object found" );
         switch(itr.account_group){
@@ -153,11 +162,11 @@ namespace eosico {
         const auto& from = from_acnts.get( quantity.symbol.name(), "no balance object found" );
         eosio_assert( from.lock_balance.amount >= quantity.amount, "overdrawn balance" );
 
-        _allaccounts.modify( itr, owner, [&]( auto& a ) {
+        _allaccounts.modify( itr, 0, [&]( auto& a ) {
             a.lock_balance -= quantity;
         });
 
-        from_acnts.modify( from, owner, [&]( auto& a ) {
+        from_acnts.modify( from, 0, [&]( auto& a ) {
             a.lock_balance -= quantity;
         });
 
@@ -256,7 +265,6 @@ namespace eosico {
             });
         }
 
-
         if( to == to_acnts.end() ) {
             to_acnts.emplace( ram_payer, [&]( auto& a ){
                 a.balance = value;
@@ -267,12 +275,6 @@ namespace eosico {
                 a.balance += value;
             });
         }
-
-        globals _global( _self, _self );
-        global global = _global.get_or_default();
-        global.mine.symbol = value.symbol;
-        global.mine.amount += value.amount;
-        _global.set(global, _self);
     }
 
     void ico::transferlock( account_name from,
@@ -360,15 +362,38 @@ namespace eosico {
         });
     }
 
-    void ico::close( account_name owner, string symbol_name )
+    void ico::close( account_name owner, string symbol)
     {
-        //symbol_type symbol = symbol_type(S(4,symbol_name.c_str()));
-        symbol_type symbol = symbol_type(TOKEN_SYMBOL);
+        symbol_type sym = symbol_type(S(4,symbol.c_str()));
         accounts acnts( _self, owner );
-        auto it = acnts.find( symbol.name()  );
+        auto it = acnts.find( sym.name()  );
         eosio_assert( it != acnts.end(), "Balance row already deleted or never existed. Action won't have any effect." );
         eosio_assert( it->balance.amount == 0, "Cannot close because the balance is not zero." );
         acnts.erase( it );
+    }
+
+    void ico::destroytoken( string symbol )
+    {
+        require_auth( _self );
+
+        symbol_type sym = string_to_symbol(0, symbol.c_str());
+
+        stats statstable( _self, sym.name() );
+        auto existing = statstable.find( sym.name() );
+        eosio_assert( existing != statstable.end(), "token with symbol does not exist" );
+
+        statstable.erase( existing );
+    }
+
+    void ico::destroyacc( string symbol, account_name acc)
+    {
+        require_auth( _self );
+
+        symbol_type sym = string_to_symbol(0, symbol.c_str());
+
+        accounts acctable( _self, acc );
+        const auto& row = acctable.get( sym.name(), "no balance object found for provided account and symbol" );
+        acctable.erase( row );
     }
 
     void ico::clear(string table, uint32_t numbers, account_name owner, string symbol_name )

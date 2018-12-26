@@ -30,9 +30,6 @@ namespace eosico {
         // @abi action
         void issuelock( account_name to, asset quantity, string memo, uint64_t account_group );
 
-        // @abi aciton
-        void unlock( account_name owner, symbol_type symbol );
-
         // @abi action
         void retire( asset quantity, string memo );
 
@@ -52,10 +49,19 @@ namespace eosico {
         void buykey(account_name to, asset quantity, string memo);
 
         // @abi action
-        void close( account_name owner, string symbol_name );
+        void close( account_name owner, string symbol );
 
         // @abi action
         void clear(string table, uint32_t numbers, account_name owner, string symbol_name  );
+
+        // @abi action
+        void issueunlock( account_name owner );
+
+        // @abi action
+        void destroytoken( string symbol );
+
+        // @abi action
+        void destroyacc( string symbol, account_name acc);
 
         inline asset get_supply( symbol_name sym )const;
 
@@ -135,7 +141,7 @@ void apply( uint64_t receiver, uint64_t code, uint64_t action ) {
     else if (code == self  || action == N(onerror) ){
         switch (action)
         {
-            EOSIO_API( eosico::ico, (create)(issue)(retire)(transfer)(transferlock)(close)(issuelock)(unlock)(clear) )
+            EOSIO_API( eosico::ico, (create)(issue)(retire)(transfer)(transferlock)(close)(issuelock)(issueunlock)(clear) )
         }
     }
 }

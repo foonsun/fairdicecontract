@@ -29,7 +29,8 @@ struct account {
     uint64_t primary_key()const { return balance.symbol.name(); }
 };
 
-struct currency_stats {
+// @abi table stat i64
+struct currencystat {
     asset          supply;
     asset          max_supply;
     account_name   issuer;
@@ -63,7 +64,7 @@ struct global {
 };
 
 typedef eosio::multi_index<N(accounts), account> accounts;
-typedef eosio::multi_index<N(stat), currency_stats> stats;
+typedef eosio::multi_index<N(stat), currencystat> stats;
 typedef eosio::multi_index<N(allaccounts), allaccount> allaccounts;
 typedef eosio::multi_index<N(icoinfos), icoinfo> icoinfos;
 typedef eosio::singleton<N(globals), global> globals;
