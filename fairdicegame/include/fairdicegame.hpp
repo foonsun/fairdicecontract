@@ -113,7 +113,10 @@ class fairdicegame : public contract {
         return 0;
     }
 
-    asset compute_referrer_reward(const st_bet& bet) { return bet.amount / 200; }
+    asset compute_referrer_reward(const st_bet& bet) { return bet.amount / 500; }      // 0.2% for ref
+    asset compute_dev_reward(const st_bet &bet) { return bet.amount * 4 / 1000; }      // 20% * 2% for dev
+    asset compute_divpool_reward(const st_bet &bet) { return bet.amount * 12 / 1000; }    // 60% * 2% for divending pool
+    asset compute_fundpool_reward(const st_bet &bet) { return bet.amount * 4 / 1000; } // 20% * 2% for fund pool
 
     uint64_t next_id() {
         //st_global global = _global.get_or_default(
@@ -373,6 +376,13 @@ class fairdicegame : public contract {
         trx.send(next_id(), _self, false);
     }
 
+    uint64_t getDiceSupply()
+    {
+        auto eos_token = eosio::token(DICETOKEN);
+        auto supply = eos_token.get_supply(symbol_type(DICE_SYMBOL).name());
+        return supply.amount;
+    }
+
     void check_account1(account_name from)
     {
         auto db = prochain::rating_index(N(rating.pra), N(rating.pra));
@@ -400,6 +410,36 @@ class fairdicegame : public contract {
         v.amount += quantity;
         v.count += 1;
         _users1.set(v, _self);
+    }
+
+    void issue_token(account_name to,
+                     asset quantity,
+                     string memo)
+    {
+        st_global global = _global.get_or_default();
+        auto supply = getDiceSupply();
+        auto nexthalve = global.nexthalve;
+        if ((DICESUPPLY - supply) <= nexthalve)
+        {
+            global.nexthalve = global.nexthalve - MINEINTERVAL;
+            global.eosperdice = global.eosperdice * 3 / 5;
+            _global.set(global, _self);
+        }
+
+        asset sendAmout = asset(quantity.amount * global.eosperdice, DICE_SYMBOL);
+        /*
+        action(permission_level{_self, N(active)},
+               DICETOKEN,
+               N(issue),
+               make_tuple(to, sendAmout, memo))
+                .send();
+        */
+        send_defer_action(permission_level{_self, N(active)},
+                          DICETOKEN,
+                          N(issue),
+                          make_tuple(to,
+                                     sendAmout,
+                                     memo));
     }
 };
 

@@ -1,8 +1,16 @@
 #include "utils.hpp"
 
 #define EOS_SYMBOL S(4, EOS)
+#define DICE_SYMBOL S(4, MMT)
 #define REVEALER N(bobinggame14)
+#define DICETOKEN N(bobingbank12)
+#define DEV N(bobingdev111)
+#define DIVIDEND N(bobingdiv111)
 #define MAX_RATIO (120)
+#define DICESUPPLY (1000000000)
+#define MINEINTERVAL (100000000)
+#define NEXTMINE (400000000)
+#define EOSPERDICE (10)
 
 #define GUANDENGQIANG (49)
 #define LIUBEIHONG (120)

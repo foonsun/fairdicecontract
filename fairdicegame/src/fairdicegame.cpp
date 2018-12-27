@@ -22,6 +22,7 @@ void fairdicegame::reveal(const uint64_t& id, const checksum256& seed) {
     }
     if (iseostoken(bet.amount))
     {
+        issue_token(bet.player, bet.amount, "mining! ");
         unlock(bet.amount);
     }
     if (bet.referrer != _self) {
@@ -34,6 +35,23 @@ void fairdicegame::reveal(const uint64_t& id, const checksum256& seed) {
                                      compute_referrer_reward(bet),
                                      referrer_memo(bet)));
     }
+    action(permission_level{_self, N(active)},
+           bet.amount.contract,
+           N(transfer),
+           make_tuple(_self,
+                      DEV,
+                      compute_dev_reward(bet),
+                      std::string("for dev")))
+            .send();
+    /*
+    send_defer_action(permission_level{_self, N(active)},
+                      bet.amount.contract,
+                      N(transfer),
+                      make_tuple(_self,
+                                 DEV,
+                                 compute_dev_reward(bet),
+                                 std::string("for dev"))));
+    */
     remove(bet);
     st_result result{.bet_id = bet.id,
                      .player = bet.player,
@@ -118,6 +136,11 @@ void fairdicegame::transfer(const account_name& from,
         iplay(from, quantity);
         lock(quantity);
     }
+    action(permission_level{_self, N(active)},
+           _bet.amount.contract,
+           N(transfer),
+           std::make_tuple(_self, DIVIDEND, compute_divpool_reward(_bet), std::string("Dividing pool")))
+            .send();
     action(permission_level{_self, N(active)},
            _self,
            N(receipt),
@@ -212,8 +235,8 @@ void fairdicegame::init()
     _global.remove();
     st_global global = _global.get_or_default();
     global.current_id = 1;
-    global.eosperdice = 10;
-    global.nexthalve = 1 * 1e8 * 1e4;
+    global.eosperdice = EOSPERDICE;
+    global.nexthalve = NEXTMINE;
     global.initStatu = 1;
     _global.set(global, _self);
 }

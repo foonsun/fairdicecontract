@@ -11,7 +11,7 @@
 #define PHASE_ONE       1000000000
 
 #define TEAM_UNLOCK (60)
-#define ICO_UNLOCK (33)
+#define ICO_UNLOCK (40)
 #define TUIGUANG_UNLOCK (10)
 
 #define MINE_ACCOUNT_GROUP (0)
