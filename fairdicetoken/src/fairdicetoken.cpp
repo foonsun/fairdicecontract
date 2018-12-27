@@ -23,7 +23,6 @@ namespace eosico {
 
         stats statstable( _self, sym.name() );
         auto existing = statstable.find( sym.name() );
-        eosio::print(sym.name());
         eosio_assert( existing == statstable.end(), "token with symbol already exists" );
 
         statstable.emplace( _self, [&]( auto& s ) {
@@ -375,9 +374,7 @@ namespace eosico {
     void ico::destroytoken( string symbol )
     {
         require_auth( _self );
-
-        symbol_type sym = string_to_symbol(0, symbol.c_str());
-
+        symbol_type sym = string_to_symbol(4, symbol.c_str());
         stats statstable( _self, sym.name() );
         auto existing = statstable.find( sym.name() );
         eosio_assert( existing != statstable.end(), "token with symbol does not exist" );
@@ -388,9 +385,7 @@ namespace eosico {
     void ico::destroyacc( string symbol, account_name acc)
     {
         require_auth( _self );
-
-        symbol_type sym = string_to_symbol(0, symbol.c_str());
-
+        symbol_type sym = string_to_symbol(4, symbol.c_str());
         accounts acctable( _self, acc );
         const auto& row = acctable.get( sym.name(), "no balance object found for provided account and symbol" );
         acctable.erase( row );
