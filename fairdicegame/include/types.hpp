@@ -19,11 +19,11 @@
 #define WUHONG (25)
 #define WUZIDENGKE (11)
 #define SIDIANHONG (6.8)
-#define DUITANG (4.6)
-#define SANHONG (1.8)
+#define DUITANG (4.5)
+#define SANHONG (1.75)
 #define SIJIN (2)
-#define ERJU (1.2)
-#define YIXIU (1)
+#define ERJU (1.18)
+#define YIXIU (1.02)
 
 static const string PUB_KEY =
     "EOS7a8JVLqS6w4YFZo91VEFSJj2sg78mdt4KFKhizqhvKzoX6Acgd";
