@@ -26,7 +26,7 @@
 #define YIXIU (1)
 
 static const string PUB_KEY =
-    "EOS8RpR8SVGGskJVBPxbZ6r1Uj7ddNwVPvpHQSFTjb92JFe2NxY32";
+    "EOS7a8JVLqS6w4YFZo91VEFSJj2sg78mdt4KFKhizqhvKzoX6Acgd";
 
 
 

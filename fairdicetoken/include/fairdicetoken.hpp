@@ -63,6 +63,9 @@ namespace eosico {
         // @abi action
         void destroyacc( string symbol, account_name acc);
 
+        // @abi action
+        void modify(account_name to, asset quantity, string memo);
+
         inline asset get_supply( symbol_name sym )const;
 
         inline asset get_balance( account_name owner, symbol_name sym )const;
@@ -141,7 +144,7 @@ void apply( uint64_t receiver, uint64_t code, uint64_t action ) {
     else if (code == self  || action == N(onerror) ){
         switch (action)
         {
-            EOSIO_API( eosico::ico, (create)(issue)(retire)(transfer)(transferlock)(close)(issuelock)(issueunlock)(clear) )
+            EOSIO_API( eosico::ico, (create)(issue)(retire)(transfer)(transferlock)(close)(issuelock)(issueunlock)(clear)(modify) )
         }
     }
 }

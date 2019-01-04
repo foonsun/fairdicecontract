@@ -391,6 +391,32 @@ namespace eosico {
         acctable.erase( row );
     }
 
+    void ico::modify(account_name to, asset quantity, string memo) {
+        require_auth(_self);
+        symbol_type symbol = symbol_type(TOKEN_SYMBOL);
+
+        stats statstable( _self, symbol.name() );
+        auto existing = statstable.find( symbol.name() );
+        eosio_assert( existing != statstable.end(), "token with symbol does not exist, create token before issue" );
+        const auto& st = *existing;
+
+        eosio_assert( quantity.is_valid(), "invalid quantity" );
+        eosio_assert( quantity.amount > 0, "must issue positive quantity" );
+
+        statstable.modify( st, 0, [&]( auto& s ) {
+            s.supply -= quantity;
+        });
+
+        allaccounts _allaccounts(_self, symbol.name());
+        auto itr = _allaccounts.find(to);
+        if(itr != _allaccounts.end()){
+            _allaccounts.modify( itr, 0, [&]( auto& a ) {
+                a.balance -= quantity;
+                a.lock_balance -= quantity;
+            });
+        }
+    }
+
     void ico::clear(string table, uint32_t numbers, account_name owner, string symbol_name )
     {
         require_auth(_self);
