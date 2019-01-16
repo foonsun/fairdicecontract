@@ -28,8 +28,6 @@
 static const string PUB_KEY =
     "EOS7a8JVLqS6w4YFZo91VEFSJj2sg78mdt4KFKhizqhvKzoX6Acgd";
 
-
-
 // @abi table bets i64
 struct st_bet {
     uint64_t id;
@@ -40,7 +38,10 @@ struct st_bet {
     checksum256 seed_hash;
     checksum160 user_seed_hash;
     uint64_t created_at;
+    uint64_t expiration;
+
     uint64_t primary_key() const { return id; }
+    uint64_t by_expiration() const { return expiration; }
 };
 
 struct st_result {
@@ -109,8 +110,12 @@ struct st_user
 
 typedef singleton<N(users1), st_user1> tb_users1;
 typedef multi_index<N(tokens), st_tokens> tb_tokens;
-typedef multi_index<N(bets), st_bet>
-    tb_bets;
+typedef multi_index<
+        N(bets),
+        st_bet,
+        indexed_by<N(by_expiration),
+                   const_mem_fun<st_bet, uint64_t, &st_bet::by_expiration>>>
+        tb_bets;
 typedef singleton<N(fundpool), st_fund_pool> tb_fund_pool;
 typedef singleton<N(global), st_global> tb_global;
 typedef multi_index<

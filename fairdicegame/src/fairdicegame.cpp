@@ -52,7 +52,8 @@ void fairdicegame::reveal(const uint64_t& id, const checksum256& seed) {
                                  compute_dev_reward(bet),
                                  std::string("for dev"))));
     */
-    remove(bet);
+    //remove(bet);
+    remove_ex(id);
     st_result result{.bet_id = bet.id,
                      .player = bet.player,
                      .referrer = bet.referrer,
@@ -128,7 +129,8 @@ void fairdicegame::transfer(const account_name& from,
                       /* .roll_under = roll_under, */
                       .seed_hash = seed_hash,
                       .user_seed_hash = user_seed_hash,
-                      .created_at = uint64_t(now())*1000};
+                      .created_at = uint64_t(now())*1000,
+                      .expiration = expiration};
     save(_bet);
     if (iseostoken(quantity))
     {

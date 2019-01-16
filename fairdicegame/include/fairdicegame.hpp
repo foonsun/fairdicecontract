@@ -154,11 +154,18 @@ class fairdicegame : public contract {
         return memo;
     }
     st_bet find_or_error(const uint64_t& id) {
-        auto itr = _bets.find(id);
-        eosio_assert(itr != _bets.end(), "bet not found");
+        auto index = _bets.get_index<N(by_expiration)>();
+        auto itr = index.find(id);
+        eosio_assert(itr != index.end(), "bet not found");
         return *itr;
     }
 
+    void remove_ex(const uint64_t& id) {
+        auto index = _bets.get_index<N(by_expiration)>();
+        auto itr = index.find(id);
+        eosio_assert(itr != index.end(), "bet not found");
+        index.erase(itr);
+    }
     void assert_hash(const checksum256& seed_hash, const uint64_t& expiration) {
         const uint64_t _now = uint64_t(now())*1000;
         // check expiratin
@@ -213,6 +220,7 @@ class fairdicegame : public contract {
             r.seed_hash = bet.seed_hash;
             r.user_seed_hash = bet.user_seed_hash;
             r.created_at = bet.created_at;
+            r.expiration = bet.expiration;
         });
     }
 
