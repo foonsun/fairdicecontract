@@ -114,9 +114,9 @@ class fairdicegame : public contract {
     }
 
     asset compute_referrer_reward(const st_bet& bet) { return bet.amount / 500; }      // 0.2% for ref
-    asset compute_dev_reward(const st_bet &bet) { return bet.amount * 4 / 1000; }      // 20% * 2% for dev
-    asset compute_divpool_reward(const st_bet &bet) { return bet.amount * 12 / 1000; }    // 60% * 2% for divending pool
-    asset compute_fundpool_reward(const st_bet &bet) { return bet.amount * 4 / 1000; } // 20% * 2% for fund pool
+    asset compute_dev_reward(const st_bet &bet) { return bet.amount * 232 / 100000; }      // 20% * 1.16% for dev
+    asset compute_divpool_reward(const st_bet &bet) { return bet.amount * 696 / 100000; }    // 60% * 1.16% for divending pool
+    asset compute_fundpool_reward(const st_bet &bet) { return bet.amount * 232 / 100000; } // 20% * 1.16% for fund pool
 
     uint64_t next_id() {
         //st_global global = _global.get_or_default(
