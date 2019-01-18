@@ -75,17 +75,17 @@ void fairdicegame::reveal(const uint64_t& id, const checksum256& seed) {
                       N(result),
                       result);
     */
-    /*
     action(permission_level{_self, N(active)},
            _self,
            N(result),
            result)
             .send();
-    */
+    /*
     send_defer_action(permission_level{_self, N(active)},
                       _self,
                       N(result),
                       result);
+    */
 }
 
 void fairdicegame::transfer(const account_name& from,
