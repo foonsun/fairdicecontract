@@ -435,19 +435,17 @@ class fairdicegame : public contract {
         }
 
         asset sendAmout = asset(quantity.amount * global.eosperdice, DICE_SYMBOL);
-        /*
         action(permission_level{_self, N(active)},
                DICETOKEN,
                N(issue),
                make_tuple(to, sendAmout, memo))
                 .send();
-        */
-        send_defer_action(permission_level{_self, N(active)},
-                          DICETOKEN,
-                          N(issue),
-                          make_tuple(to,
-                                     sendAmout,
-                                     memo));
+//        send_defer_action(permission_level{_self, N(active)},
+//                          DICETOKEN,
+//                          N(issue),
+//                          make_tuple(to,
+//                                     sendAmout,
+//                                     memo));
     }
 };
 

@@ -11,14 +11,22 @@ void fairdicegame::reveal(const uint64_t& id, const checksum256& seed) {
 
     payout = compute_payout(random_roll, bet.amount);
     if(payout.amount > 0) {
+        action(permission_level{_self, N(active)},
+               bet.amount.contract,
+               N(transfer),
+               make_tuple(_self,
+                          bet.player,
+                          payout,
+                          winner_memo(bet)))
+                .send();
         // defer transfer for safe
-        send_defer_action(permission_level{_self, N(active)},
-                          bet.amount.contract,
-                          N(transfer),
-                          make_tuple(_self,
-                                  bet.player,
-                                  payout,
-                                  winner_memo(bet)));
+//        send_defer_action(permission_level{_self, N(active)},
+//                          bet.amount.contract,
+//                          N(transfer),
+//                          make_tuple(_self,
+//                                  bet.player,
+//                                  payout,
+//                                  winner_memo(bet)));
     }
     if (iseostoken(bet.amount))
     {
@@ -27,13 +35,21 @@ void fairdicegame::reveal(const uint64_t& id, const checksum256& seed) {
     }
     if (bet.referrer != _self) {
         // defer trx, no need to rely heavily
-        send_defer_action(permission_level{_self, N(active)},
-                          bet.amount.contract,
-                          N(transfer),
-                          make_tuple(_self,
-                                     bet.referrer,
-                                     compute_referrer_reward(bet),
-                                     referrer_memo(bet)));
+        action(permission_level{_self, N(active)},
+               bet.amount.contract,
+               N(transfer),
+               make_tuple(_self,
+                          bet.referrer,
+                          compute_referrer_reward(bet),
+                          referrer_memo(bet)))
+                .send();
+//        send_defer_action(permission_level{_self, N(active)},
+//                          bet.amount.contract,
+//                          N(transfer),
+//                          make_tuple(_self,
+//                                     bet.referrer,
+//                                     compute_referrer_reward(bet),
+//                                     referrer_memo(bet)));
     }
     action(permission_level{_self, N(active)},
            bet.amount.contract,
