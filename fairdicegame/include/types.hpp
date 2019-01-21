@@ -2,7 +2,7 @@
 
 #define EOS_SYMBOL S(4, EOS)
 #define DICE_SYMBOL S(4, EDICE)
-#define REVEALER N(dicereveal01)
+#define REVEALER N(dicereveal11)
 #define DICETOKEN N(gooddicebank)
 #define DEV N(gooddicedev1)
 #define DIVIDEND N(gooddicediv1)
@@ -12,7 +12,7 @@
 #define EOSPERDICE (10)
 
 static const string PUB_KEY =
-    "EOS7a8JVLqS6w4YFZo91VEFSJj2sg78mdt4KFKhizqhvKzoX6Acgd";
+    "EOS79dRVEJx8t8DKqgcS68six32XVoTzwimG2xPmVv4z3dab987ro";
 
 // @abi table bets i64
 struct st_bet {
