@@ -7,7 +7,7 @@
 #include <eosiolib/action.h>
 #include <eosiolib/singleton.hpp>
 
-#define TOKEN_SYMBOL    S(4,MMT)
+#define TOKEN_SYMBOL    S(4,EDICE)
 #define PHASE_ONE       1000000000
 
 #define TEAM_UNLOCK (60)

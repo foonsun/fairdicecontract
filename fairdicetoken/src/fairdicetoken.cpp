@@ -19,7 +19,7 @@ namespace eosico {
         eosio_assert( maximum_supply.is_valid(), "invalid supply");
         eosio_assert( maximum_supply.amount > 0, "max-supply must be positive");
 
-        eosio_assert( maximum_supply.symbol == TOKEN_SYMBOL, "only can create MMT symbol");
+        eosio_assert( maximum_supply.symbol == TOKEN_SYMBOL, "only can create EDICE symbol");
 
         stats statstable( _self, sym.name() );
         auto existing = statstable.find( sym.name() );

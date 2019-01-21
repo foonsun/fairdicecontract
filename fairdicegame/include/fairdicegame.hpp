@@ -49,7 +49,7 @@ class fairdicegame : public contract {
     tb_tokens _tokens;
     tb_users1 _users;
     void parse_memo(string memo,
-                    /* uint8_t* roll_under, */
+                    uint8_t* roll_under,
                     checksum256* seed_hash,
                     checksum160* user_seed_hash,
                     uint64_t* expiration,
@@ -62,18 +62,14 @@ class fairdicegame : public contract {
                    memo.end());
 
         size_t sep_count = std::count(memo.begin(), memo.end(), '-');
-        //eosio_assert(sep_count == 5, "invalid memo");
-        eosio_assert(sep_count == 4, "invalid memo");
+        eosio_assert(sep_count == 5, "invalid memo");
 
         size_t pos;
         string container;
-        /*
         pos = sub2sep(memo, &container, '-', 0, true);
         eosio_assert(!container.empty(), "no roll under");
         *roll_under = stoi(container);
-        */
-        //pos = sub2sep(memo, &container, '-', ++pos, true);
-        pos = sub2sep(memo, &container, '-', 0, true);
+        pos = sub2sep(memo, &container, '-', ++pos, true);
         eosio_assert(!container.empty(), "no seed hash");
         *seed_hash = hex_to_sha256(container);
         pos = sub2sep(memo, &container, '-', ++pos, true);
@@ -89,7 +85,14 @@ class fairdicegame : public contract {
         eosio_assert(!container.empty(), "no signature");
         *sig = str_to_sig(container);
     }
-    uint8_t compute_random_roll(const checksum256& seed1, const checksum160& seed2, uint8_t (&random_roll)[6]) {
+    uint8_t compute_random_roll(const checksum256& seed1, const checksum160& seed2) {
+        size_t hash = 0;
+        hash_combine(hash, sha256_to_hex(seed1));
+        hash_combine(hash, sha1_to_hex(seed2));
+        return hash % 100 + 1;
+    }
+    /*
+    uint8_t compute_random_roll(const checksum256& seed1, const checksum160& seed2) {
 
         size_t hash = 0;
         hash_combine(hash, sha256_to_hex(seed1));
@@ -112,11 +115,12 @@ class fairdicegame : public contract {
         random_roll[5] = hash % 6 + 1;
         return 0;
     }
+    */
 
     asset compute_referrer_reward(const st_bet& bet) { return bet.amount / 500; }      // 0.2% for ref
-    asset compute_dev_reward(const st_bet &bet) { return bet.amount * 232 / 100000; }      // 20% * 1.16% for dev
-    asset compute_divpool_reward(const st_bet &bet) { return bet.amount * 696 / 100000; }    // 60% * 1.16% for divending pool
-    asset compute_fundpool_reward(const st_bet &bet) { return bet.amount * 232 / 100000; } // 20% * 1.16% for fund pool
+    asset compute_dev_reward(const st_bet &bet) { return bet.amount * 4 / 1000; }      // 20% * 2% for dev
+    asset compute_divpool_reward(const st_bet &bet) { return bet.amount * 12 / 1000; }    // 60% * 2% for divending pool
+    asset compute_fundpool_reward(const st_bet &bet) { return bet.amount * 4 / 1000; } // 20% * 2% for fund pool
 
     uint64_t next_id() {
         //st_global global = _global.get_or_default(
@@ -201,12 +205,11 @@ class fairdicegame : public contract {
         eosio_assert(quantity.amount >= itr->minAmout, "transfer quantity must be greater than minimum");
     }
 
-    void assert_roll_under(/* const uint8_t& roll_under , */ const extended_asset& quantity) {
-        /* eosio_assert(roll_under >= 2 && roll_under <= 96,
+    void assert_roll_under(const uint8_t& roll_under , const extended_asset& quantity) {
+         eosio_assert(roll_under >= 2 && roll_under <= 96,
                      "roll under overflow, must be greater than 2 and less than 96");
-        */
          eosio_assert(
-            max_payout(/* roll_under, */ quantity) <= max_bonus(quantity),
+            max_payout(roll_under, quantity) <= max_bonus(quantity),
             "offered overflow, expected earning is greater than the maximum bonus");
     }
 
@@ -216,7 +219,7 @@ class fairdicegame : public contract {
             r.player = bet.player;
             r.referrer = bet.referrer;
             r.amount = bet.amount;
-            /* r.roll_under = bet.roll_under; */
+            r.roll_under = bet.roll_under;
             r.seed_hash = bet.seed_hash;
             r.user_seed_hash = bet.user_seed_hash;
             r.created_at = bet.created_at;
@@ -239,86 +242,14 @@ class fairdicegame : public contract {
         _fund_pool.set(pool, _self);
     }
 
-    asset compute_payout(/* const uint8_t& roll_under, */ const uint8_t (&random_roll)[6] , const extended_asset& offer) {
-        uint8_t one_count = 0;
-        uint8_t two_count = 0;
-        uint8_t three_count = 0;
-        uint8_t four_count = 0;
-        uint8_t five_count = 0;
-        uint8_t six_count = 0;
-        for(int i = 0; i < sizeof(random_roll); i++) {
-            uint8_t roll_number = random_roll[i];
-            switch(roll_number){
-                case 1:
-                    one_count++;
-                    break;
-                case 2:
-                    two_count++;
-                    break;
-                case 3:
-                    three_count++;
-                    break;
-                case 4:
-                    four_count++;
-                    break;
-                case 5:
-                    five_count++;
-                    break;
-                case 6:
-                    six_count++;
-                    break;
-                default:
-                    eosio::print("roll number must be between 1 and 6\n");
-            }
-        }
-// calculate result
-        asset payout = asset(0, offer.symbol);
-        if (six_count == 6 || five_count == 6 || three_count == 6 || two_count == 6) {
-            payout.amount = offer.amount * GUANDENGQIANG;
-        }
-        else if(four_count == 6){
-            payout.amount = offer.amount * LIUBEIHONG;
-        }
-        else if(four_count == 4 && one_count == 2){
-            payout.amount = offer.amount * CHAJINHUA;
-        }
-        else if(one_count == 6){
-            payout.amount = offer.amount * BIANDIJIN;
-        }
-        else if(four_count == 5){
-            payout.amount = offer.amount * WUHONG;
-        }
-        else if(six_count == 5 || five_count == 5 || three_count == 5 || two_count == 5 || one_count == 5){
-            payout.amount = offer.amount * WUZIDENGKE;
-        }
-        else if(four_count == 4){
-            payout.amount = offer.amount * SIDIANHONG;
-        }
-        else if(one_count == 1 && two_count == 1 && three_count == 1 && four_count == 1 && five_count == 1 && six_count == 1){
-            payout.amount = offer.amount * DUITANG;
-        }
-        else if(four_count == 3){
-            payout.amount = offer.amount * SANHONG;
-        }
-        else if(three_count == 4 || two_count == 4 || one_count == 4 || five_count == 4 || six_count == 4){
-            payout.amount = offer.amount * SIJIN;
-        }
-        else if(four_count == 2){
-            payout.amount = offer.amount * ERJU;
-        }
-        else if(four_count == 1){
-            payout.amount = offer.amount * YIXIU;
-        }
-        else{
-            payout.amount = 0;
-        }
-        return min(payout, max_bonus(offer));
+    asset compute_payout(const uint8_t& roll_under, const extended_asset& offer) {
+        return min(max_payout(roll_under, offer), max_bonus(offer));
     }
 
-    asset max_payout(/* const uint8_t& roll_under, */ const extended_asset& offer) {
-//      const double ODDS = 98.0 / ((double)roll_under - 1.0);
+    asset max_payout( const uint8_t& roll_under, const extended_asset& offer) {
+        const double ODDS = 98.0 / ((double)roll_under - 1.0);
         //max pay amount can be awarded.
-        return asset(MAX_RATIO * offer.amount, offer.symbol);
+        return asset(ODDS * offer.amount, offer.symbol);
     }
 
     asset max_bonus(const extended_asset &quantity) { return available_balance(quantity) / 2; }
@@ -346,14 +277,14 @@ class fairdicegame : public contract {
         return _fund_pool.get_or_create(_self, fund_pool);
     }
 
-    void assert_signature(/* const uint8_t& roll_under, */
+    void assert_signature(const uint8_t& roll_under,
                           const checksum256& seed_hash,
                           const uint64_t& expiration,
                           const account_name& referrer,
                           const signature& sig) {
-        /* string data = uint64_string(roll_under);
-        data += "-"; */
-        string data = sha256_to_hex(seed_hash);
+        string data = uint64_string(roll_under);
+        data += "-";
+        data += sha256_to_hex(seed_hash);
         data += "-";
         data += uint64_string(expiration);
         data += "-";

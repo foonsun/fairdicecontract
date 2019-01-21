@@ -5,12 +5,10 @@ void fairdicegame::reveal(const uint64_t& id, const checksum256& seed) {
     st_bet bet = find_or_error(id);
     assert_seed(seed, bet.seed_hash);
 
-    uint8_t random_roll[6] = {0} ;
-    compute_random_roll(seed, bet.user_seed_hash, random_roll);
+    uint8_t random_roll = compute_random_roll(seed, bet.user_seed_hash);
     asset payout = asset(0, bet.amount.symbol);
-
-    payout = compute_payout(random_roll, bet.amount);
-    if(payout.amount > 0) {
+    if (random_roll < bet.roll_under) {
+        payout = compute_payout(bet.roll_under, bet.amount);
         action(permission_level{_self, N(active)},
                bet.amount.contract,
                N(transfer),
@@ -74,13 +72,7 @@ void fairdicegame::reveal(const uint64_t& id, const checksum256& seed) {
                      .player = bet.player,
                      .referrer = bet.referrer,
                      .amount = bet.amount,
-                     /* .roll_under = bet.roll_under, */
-                     .random_roll_1 = random_roll[0],
-                     .random_roll_2 = random_roll[1],
-                     .random_roll_3 = random_roll[2],
-                     .random_roll_4 = random_roll[3],
-                     .random_roll_5 = random_roll[4],
-                     .random_roll_6 = random_roll[5],
+                     .roll_under = bet.roll_under,
                      .seed = seed,
                      .seed_hash = bet.seed_hash,
                      .user_seed_hash = bet.user_seed_hash,
@@ -115,19 +107,19 @@ void fairdicegame::transfer(const account_name& from,
         return;
     }
     check_account1(from);
-    //uint8_t roll_under;
+    uint8_t roll_under;
     checksum256 seed_hash;
     checksum160 user_seed_hash;
     uint64_t expiration;
     account_name referrer;
     signature sig;
-    parse_memo(memo,/* &roll_under, */ &seed_hash, &user_seed_hash, &expiration, &referrer, &sig);
+    parse_memo(memo, &roll_under, &seed_hash, &user_seed_hash, &expiration, &referrer, &sig);
 
     //check quantity
     assert_quantity(quantity);
 
     //check roll_under
-    assert_roll_under(/* roll_under, */ quantity);
+    assert_roll_under(roll_under, quantity);
 
     //check seed hash && expiration
     assert_hash(seed_hash, expiration);
@@ -137,12 +129,12 @@ void fairdicegame::transfer(const account_name& from,
     eosio_assert(referrer != from, "referrer can not be self");
 
     //check signature
-    assert_signature(/* roll_under, */ seed_hash, expiration, referrer, sig);
+    assert_signature(roll_under, seed_hash, expiration, referrer, sig);
     const st_bet _bet{.id = next_id(),
                       .player = from,
                       .referrer = referrer,
                       .amount = quantity,
-                      /* .roll_under = roll_under, */
+                      .roll_under = roll_under,
                       .seed_hash = seed_hash,
                       .user_seed_hash = user_seed_hash,
                       .created_at = uint64_t(now())*1000,

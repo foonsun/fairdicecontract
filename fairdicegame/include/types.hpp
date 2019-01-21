@@ -1,29 +1,15 @@
 #include "utils.hpp"
 
 #define EOS_SYMBOL S(4, EOS)
-#define DICE_SYMBOL S(4, MMT)
-#define REVEALER N(bobinggame14)
-#define DICETOKEN N(bobingbank12)
-#define DEV N(bobingdev111)
-#define DIVIDEND N(bobingdiv111)
-#define MAX_RATIO (49)
+#define DICE_SYMBOL S(4, EDICE)
+#define REVEALER N(dicereveal01)
+#define DICETOKEN N(gooddicebank)
+#define DEV N(gooddicedev1)
+#define DIVIDEND N(gooddicediv1)
 #define DICESUPPLY (1000000000)
 #define MINEINTERVAL (100000000)
 #define NEXTMINE (400000000)
 #define EOSPERDICE (10)
-
-#define GUANDENGQIANG (16)
-#define LIUBEIHONG (49)
-#define CHAJINHUA (10)
-#define BIANDIJIN (33)
-#define WUHONG (7.7)
-#define WUZIDENGKE (4.9)
-#define SIDIANHONG (3.6)
-#define DUITANG (2.5)
-#define SANHONG (1.8)
-#define SIJIN (2)
-#define ERJU (1.5)
-#define YIXIU (1.13)
 
 static const string PUB_KEY =
     "EOS7a8JVLqS6w4YFZo91VEFSJj2sg78mdt4KFKhizqhvKzoX6Acgd";
@@ -34,7 +20,7 @@ struct st_bet {
     account_name player;
     account_name referrer;
     extended_asset amount;
-    //uint8_t roll_under;
+    uint8_t roll_under;
     checksum256 seed_hash;
     checksum160 user_seed_hash;
     uint64_t created_at;
@@ -49,13 +35,7 @@ struct st_result {
     account_name player;
     account_name referrer;
     extended_asset amount;
-    //uint8_t roll_under;
-    uint8_t random_roll_1;
-    uint8_t random_roll_2;
-    uint8_t random_roll_3;
-    uint8_t random_roll_4;
-    uint8_t random_roll_5;
-    uint8_t random_roll_6;
+    uint8_t roll_under;
     checksum256 seed;
     checksum256 seed_hash;
     checksum160 user_seed_hash;
