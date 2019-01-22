@@ -206,7 +206,7 @@ class fairdicegame : public contract {
     }
 
     void assert_roll_under(const uint8_t& roll_under , const extended_asset& quantity) {
-         eosio_assert(roll_under >= 2 && roll_under <= 96,
+         eosio_assert(roll_under >= 4 && roll_under <= 96,
                      "roll under overflow, must be greater than 2 and less than 96");
          eosio_assert(
             max_payout(roll_under, quantity) <= max_bonus(quantity),
