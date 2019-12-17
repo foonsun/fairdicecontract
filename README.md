@@ -105,24 +105,4 @@ In step 11, the smart contract calculates the final ```roll``` num based on the 
 
 ## 4. Talk is cheap, show me the code
 
-In this case, since the randomness of the final roll number is dependent on both ```house``` side and ```player``` side, neither the ```house``` nor the ```player``` is able to rig the bet alone. In order to be rig resistant and provably fair, undoubtedly, the dice game has to be open sourced:
-
-> https://github.com/Dappub/fairdicegame
-
-If you'd like to play our "FairDice" game, here's the corresponding game page:
-
-> https://dapp.pub/dice
-
-You could find more info here:
-
-> https://medium.com/dapppub/fairdicegame-187afaff9e13
-
-
-
-------
-
-
-
-| ![logo@3x](https://raw.githubusercontent.com/Dappub/fairdicegame/master/img/logo.png) |
-| -----------------------------------------------------------: |
-| [**DappPub: Unleashing the power of DApps**](https://dapp.pub) |
+In this case, since the randomness of the final roll number is dependent on both ```house``` side and ```player``` side, neither the ```house``` nor the ```player``` is able to rig the bet alone. In order to be rig resistant and provably fair, undoubtedly, the dice game has to be open sourced.
